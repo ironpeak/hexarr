@@ -4,9 +4,16 @@ pub struct HexArray<T> {
     pub tiles: Vec<T>,
 }
 
-impl<T> HexArray<T> where T: Clone {
+impl<T> HexArray<T>
+where
+    T: Clone,
+{
     pub fn new(height: usize, width: usize, default: T) -> Self {
-        HexArray { height, width, tiles: vec![default; height * width] }
+        HexArray {
+            height,
+            width,
+            tiles: vec![default; height * width],
+        }
     }
 }
 
@@ -48,6 +55,9 @@ impl<T> HexArray<T> {
                     result.push((x - 1, y - 1));
                 }
             }
+            if y < self.height - 1 {
+                result.push((x, y + 1));
+            }
         } else {
             if y < self.height - 1 {
                 result.push((x, y + 1));
@@ -58,9 +68,9 @@ impl<T> HexArray<T> {
                     result.push((x - 1, y + 1));
                 }
             }
-        }
-        if y < self.height - 1{
-            result.push((x, y + 1));
+            if y > 0 {
+                result.push((x, y - 1));
+            }
         }
         if x < self.width - 1 {
             result.push((x + 1, y));
@@ -86,26 +96,128 @@ mod tests {
     }
 
     #[test]
-    fn test_adjacent_sw_corner() {
-        let hex_array = HexArray::new(3, 3, 0);
+    fn test_adjacent_0_0() {
+        let hex_array = HexArray::new(4, 4, 0);
         assert_adjacent(&hex_array.adjacent(0, 0), &vec![(0, 1), (1, 0)]);
     }
 
     #[test]
-    fn test_adjacent_se_corner() {
-        let hex_array = HexArray::new(3, 3, 0);
-        assert_adjacent(&hex_array.adjacent(2, 0), &vec![(1, 0), (2, 1)]);
+    fn test_adjacent_0_1() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(
+            &hex_array.adjacent(0, 1),
+            &vec![(0, 0), (0, 2), (1, 0), (1, 1)],
+        );
     }
 
     #[test]
-    fn test_adjacent_nw_corner() {
-        let hex_array = HexArray::new(3, 3, 0);
-        assert_adjacent(&hex_array.adjacent(0, 2), &vec![(0, 1), (1, 1), (1, 2)]);
+    fn test_adjacent_0_2() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(
+            &hex_array.adjacent(0, 2),
+            &vec![(0, 1), (0, 3), (1, 1), (1, 2)],
+        );
     }
 
     #[test]
-    fn test_adjacent_ne_corner() {
-        let hex_array = HexArray::new(3, 3, 0);
-        assert_adjacent(&hex_array.adjacent(2, 2), &vec![(1, 1), (1, 2), (2, 1)]);
+    fn test_adjacent_0_3() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(&hex_array.adjacent(0, 3), &vec![(0, 2), (1, 2), (1, 3)]);
+    }
+
+    #[test]
+    fn test_adjacent_1_0() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(
+            &hex_array.adjacent(1, 0),
+            &vec![(0, 0), (0, 1), (1, 1), (2, 0), (2, 1)],
+        );
+    }
+
+    #[test]
+    fn test_adjacent_1_1() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(
+            &hex_array.adjacent(1, 1),
+            &vec![(0, 1), (0, 2), (1, 0), (1, 2), (2, 1), (2, 2)],
+        );
+    }
+
+    #[test]
+    fn test_adjacent_1_2() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(
+            &hex_array.adjacent(1, 2),
+            &vec![(0, 2), (0, 3), (1, 1), (1, 3), (2, 2), (2, 3)],
+        );
+    }
+
+    #[test]
+    fn test_adjacent_1_3() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(&hex_array.adjacent(1, 3), &vec![(0, 3), (1, 2), (2, 3)]);
+    }
+
+    #[test]
+    fn test_adjacent_2_0() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(&hex_array.adjacent(2, 0), &vec![(1, 0), (2, 1), (3, 0)]);
+    }
+
+    #[test]
+    fn test_adjacent_2_1() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(
+            &hex_array.adjacent(2, 1),
+            &vec![(1, 0), (1, 1), (2, 0), (2, 2), (3, 0), (3, 1)],
+        );
+    }
+
+    #[test]
+    fn test_adjacent_2_2() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(
+            &hex_array.adjacent(2, 2),
+            &vec![(1, 1), (1, 2), (2, 1), (2, 3), (3, 1), (3, 2)],
+        );
+    }
+
+    #[test]
+    fn test_adjacent_2_3() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(
+            &hex_array.adjacent(2, 3),
+            &vec![(1, 2), (1, 3), (2, 2), (3, 2), (3, 3)],
+        );
+    }
+
+    #[test]
+    fn test_adjacent_3_0() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(&hex_array.adjacent(3, 0), &vec![(2, 0), (2, 1), (3, 1)]);
+    }
+
+    #[test]
+    fn test_adjacent_3_1() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(
+            &hex_array.adjacent(3, 1),
+            &vec![(2, 1), (2, 2), (3, 0), (3, 2)],
+        );
+    }
+
+    #[test]
+    fn test_adjacent_3_2() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(
+            &hex_array.adjacent(3, 2),
+            &vec![(2, 2), (2, 3), (3, 1), (3, 3)],
+        );
+    }
+
+    #[test]
+    fn test_adjacent_3_3() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_adjacent(&hex_array.adjacent(3, 3), &vec![(2, 3), (3, 2)]);
     }
 }
