@@ -1,7 +1,10 @@
+#[cfg(feature = "serde")]
+mod serde;
+
 pub struct HexArray<T> {
-    pub height: usize,
-    pub width: usize,
-    pub tiles: Vec<T>,
+    height: usize,
+    width: usize,
+    tiles: Vec<T>,
 }
 
 impl<T> HexArray<T>
@@ -18,6 +21,14 @@ where
 }
 
 impl<T> HexArray<T> {
+    pub fn height(&self) -> usize {
+        self.height
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
     pub fn get(&self, x: usize, y: usize) -> Option<&T> {
         if x < self.height && y < self.width {
             Some(&self.tiles[x * self.width + y])
@@ -85,6 +96,61 @@ impl<T> HexArray<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // new tests
+
+    #[test]
+    fn test_new() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_eq!(hex_array.height(), 4);
+        assert_eq!(hex_array.width(), 4);
+        for x in 0..4 {
+            for y in 0..4 {
+                assert_eq!(hex_array.get(x, y), Some(&0));
+            }
+        }
+    }
+
+    // get tests
+
+    #[test]
+    fn test_get() {
+        let mut hex_array = HexArray::new(4, 4, 0);
+        hex_array.set(1, 1, 1);
+        assert_eq!(hex_array.get(1, 1), Some(&1));
+        assert_eq!(hex_array.get(1, 2), Some(&0));
+        assert_eq!(hex_array.get(2, 1), Some(&0));
+        assert_eq!(hex_array.get(2, 2), Some(&0));
+        assert_eq!(hex_array.get(4, 4), None);
+    }
+
+    // get_mut tests
+
+    #[test]
+    fn test_get_mut() {
+        let mut hex_array = HexArray::new(4, 4, 0);
+        *hex_array.get_mut(1, 1).unwrap() = 1;
+        assert_eq!(hex_array.get(1, 1), Some(&1));
+        assert_eq!(hex_array.get(1, 2), Some(&0));
+        assert_eq!(hex_array.get(2, 1), Some(&0));
+        assert_eq!(hex_array.get(2, 2), Some(&0));
+        assert_eq!(hex_array.get(4, 4), None);
+    }
+
+    // set tests
+
+    #[test]
+    fn test_set() {
+        let mut hex_array = HexArray::new(4, 4, 0);
+        hex_array.set(1, 1, 1);
+        assert_eq!(hex_array.get(1, 1), Some(&1));
+        assert_eq!(hex_array.get(1, 2), Some(&0));
+        assert_eq!(hex_array.get(2, 1), Some(&0));
+        assert_eq!(hex_array.get(2, 2), Some(&0));
+        assert_eq!(hex_array.get(4, 4), None);
+    }
+
+    // adjacent tests
 
     fn assert_adjacent(left: &Vec<(usize, usize)>, right: &Vec<(usize, usize)>) {
         if left.len() != right.len() {
