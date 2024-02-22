@@ -1,7 +1,8 @@
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct HexArray<T> {
-    pub height: usize,
-    pub width: usize,
-    pub tiles: Vec<T>,
+    height: usize,
+    width: usize,
+    tiles: Vec<T>,
 }
 
 impl<T> HexArray<T>
@@ -18,6 +19,14 @@ where
 }
 
 impl<T> HexArray<T> {
+    pub fn height(&self) -> usize {
+        self.height
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
     pub fn get(&self, x: usize, y: usize) -> Option<&T> {
         if x < self.height && y < self.width {
             Some(&self.tiles[x * self.width + y])
@@ -82,9 +91,159 @@ impl<T> HexArray<T> {
     }
 }
 
+// #[cfg(feature = "serde")]
+// impl<T> serde::Serialize for HexArray<T>
+// where
+//     T: serde::Serialize,
+// {
+//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: serde::Serializer,
+//     {
+//         let mut state = serializer.serialize_struct("HexArray", 3)?;
+//         state.serialize_field("height", &self.height)?;
+//         state.serialize_field("width", &self.width)?;
+//         state.serialize_field("tiles", &self.tiles)?;
+//         state.end()
+//     }
+// }
+
+// #[cfg(feature = "serde")]
+// impl<T> serde::Deserialize for HexArray<T>
+// where
+//     T: serde::Deserialize,
+// {
+//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+//     where
+//         D: serde::Deserializer,
+//     {
+//         #[derive(serde::Deserialize)]
+//         #[serde(field_identifier, rename_all = "lowercase")]
+//         enum Field {
+//             Height,
+//             Width,
+//             Tiles,
+//         }
+
+//         struct HexArrayVisitor<T> {
+//             marker: std::marker::PhantomData<T>,
+//         }
+
+//         impl<T> serde::de::Visitor for HexArrayVisitor<T>
+//         where
+//             T: serde::Deserialize,
+//         {
+//             type Value = HexArray<T>;
+
+//             fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+//                 formatter.write_str("struct HexArray")
+//             }
+
+//             fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+//             where
+//                 A: serde::de::MapAccess,
+//             {
+//                 let mut height = None;
+//                 let mut width = None;
+//                 let mut tiles = None;
+//                 while let Some(key) = map.next_key()? {
+//                     match key {
+//                         Field::Height => {
+//                             if height.is_some() {
+//                                 return Err(serde::de::Error::duplicate_field("height"));
+//                             }
+//                             height = Some(map.next_value()?);
+//                         }
+//                         Field::Width => {
+//                             if width.is_some() {
+//                                 return Err(serde::de::Error::duplicate_field("width"));
+//                             }
+//                             width = Some(map.next_value()?);
+//                         }
+//                         Field::Tiles => {
+//                             if tiles.is_some() {
+//                                 return Err(serde::de::Error::duplicate_field("tiles"));
+//                             }
+//                             tiles = Some(map.next_value()?);
+//                         }
+//                     }
+//                 }
+//                 let height = height.ok_or_else(|| serde::de::Error::missing_field("height"))?;
+//                 let width = width.ok_or_else(|| serde::de::Error::missing_field("width"))?;
+//                 let tiles = tiles.ok_or_else(|| serde::de::Error::missing_field("tiles"))?;
+//                 Ok(HexArray {
+//                     height,
+//                     width,
+//                     tiles,
+//                 })
+//             }
+//         }
+
+//         const FIELDS: &[&str] = &["height", "width", "tiles"];
+//         deserializer.deserialize_struct("HexArray", FIELDS, HexArrayVisitor {
+//             marker: std::marker::PhantomData,
+//         })
+//     }
+// }
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // new tests
+
+    #[test]
+    fn test_new() {
+        let hex_array = HexArray::new(4, 4, 0);
+        assert_eq!(hex_array.height(), 4);
+        assert_eq!(hex_array.width(), 4);
+        for x in 0..4 {
+            for y in 0..4 {
+                assert_eq!(hex_array.get(x, y), Some(&0));
+            }
+        }
+    }
+
+    // get tests
+
+    #[test]
+    fn test_get() {
+        let mut hex_array = HexArray::new(4, 4, 0);
+        hex_array.set(1, 1, 1);
+        assert_eq!(hex_array.get(1, 1), Some(&1));
+        assert_eq!(hex_array.get(1, 2), Some(&0));
+        assert_eq!(hex_array.get(2, 1), Some(&0));
+        assert_eq!(hex_array.get(2, 2), Some(&0));
+        assert_eq!(hex_array.get(4, 4), None);
+    }
+
+    // get_mut tests
+
+    #[test]
+    fn test_get_mut() {
+        let mut hex_array = HexArray::new(4, 4, 0);
+        *hex_array.get_mut(1, 1).unwrap() = 1;
+        assert_eq!(hex_array.get(1, 1), Some(&1));
+        assert_eq!(hex_array.get(1, 2), Some(&0));
+        assert_eq!(hex_array.get(2, 1), Some(&0));
+        assert_eq!(hex_array.get(2, 2), Some(&0));
+        assert_eq!(hex_array.get(4, 4), None);
+    }
+
+    // set tests
+
+    #[test]
+    fn test_set() {
+        let mut hex_array = HexArray::new(4, 4, 0);
+        hex_array.set(1, 1, 1);
+        assert_eq!(hex_array.get(1, 1), Some(&1));
+        assert_eq!(hex_array.get(1, 2), Some(&0));
+        assert_eq!(hex_array.get(2, 1), Some(&0));
+        assert_eq!(hex_array.get(2, 2), Some(&0));
+        assert_eq!(hex_array.get(4, 4), None);
+    }
+
+    // adjacent tests
 
     fn assert_adjacent(left: &Vec<(usize, usize)>, right: &Vec<(usize, usize)>) {
         if left.len() != right.len() {
