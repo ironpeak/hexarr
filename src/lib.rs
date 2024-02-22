@@ -1,4 +1,6 @@
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[cfg(feature = "serde")]
+mod serde;
+
 pub struct HexArray<T> {
     height: usize,
     width: usize,
@@ -90,101 +92,6 @@ impl<T> HexArray<T> {
         result
     }
 }
-
-// #[cfg(feature = "serde")]
-// impl<T> serde::Serialize for HexArray<T>
-// where
-//     T: serde::Serialize,
-// {
-//     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//     where
-//         S: serde::Serializer,
-//     {
-//         let mut state = serializer.serialize_struct("HexArray", 3)?;
-//         state.serialize_field("height", &self.height)?;
-//         state.serialize_field("width", &self.width)?;
-//         state.serialize_field("tiles", &self.tiles)?;
-//         state.end()
-//     }
-// }
-
-// #[cfg(feature = "serde")]
-// impl<T> serde::Deserialize for HexArray<T>
-// where
-//     T: serde::Deserialize,
-// {
-//     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-//     where
-//         D: serde::Deserializer,
-//     {
-//         #[derive(serde::Deserialize)]
-//         #[serde(field_identifier, rename_all = "lowercase")]
-//         enum Field {
-//             Height,
-//             Width,
-//             Tiles,
-//         }
-
-//         struct HexArrayVisitor<T> {
-//             marker: std::marker::PhantomData<T>,
-//         }
-
-//         impl<T> serde::de::Visitor for HexArrayVisitor<T>
-//         where
-//             T: serde::Deserialize,
-//         {
-//             type Value = HexArray<T>;
-
-//             fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-//                 formatter.write_str("struct HexArray")
-//             }
-
-//             fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
-//             where
-//                 A: serde::de::MapAccess,
-//             {
-//                 let mut height = None;
-//                 let mut width = None;
-//                 let mut tiles = None;
-//                 while let Some(key) = map.next_key()? {
-//                     match key {
-//                         Field::Height => {
-//                             if height.is_some() {
-//                                 return Err(serde::de::Error::duplicate_field("height"));
-//                             }
-//                             height = Some(map.next_value()?);
-//                         }
-//                         Field::Width => {
-//                             if width.is_some() {
-//                                 return Err(serde::de::Error::duplicate_field("width"));
-//                             }
-//                             width = Some(map.next_value()?);
-//                         }
-//                         Field::Tiles => {
-//                             if tiles.is_some() {
-//                                 return Err(serde::de::Error::duplicate_field("tiles"));
-//                             }
-//                             tiles = Some(map.next_value()?);
-//                         }
-//                     }
-//                 }
-//                 let height = height.ok_or_else(|| serde::de::Error::missing_field("height"))?;
-//                 let width = width.ok_or_else(|| serde::de::Error::missing_field("width"))?;
-//                 let tiles = tiles.ok_or_else(|| serde::de::Error::missing_field("tiles"))?;
-//                 Ok(HexArray {
-//                     height,
-//                     width,
-//                     tiles,
-//                 })
-//             }
-//         }
-
-//         const FIELDS: &[&str] = &["height", "width", "tiles"];
-//         deserializer.deserialize_struct("HexArray", FIELDS, HexArrayVisitor {
-//             marker: std::marker::PhantomData,
-//         })
-//     }
-// }
 
 #[cfg(test)]
 mod tests {
