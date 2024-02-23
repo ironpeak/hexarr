@@ -1,7 +1,15 @@
 [package]
 name = "hexarr"
 version = "0.1.0"
+authors = ["Hrafn Orri Hrafnkelsson <hrafn@vidfjord.is>"]
+categories = ["data-structures", "game-engines"]
+description = "A library for working with hexagonal grids."
+documentation = "https://docs.rs/hexarr"
 edition = "2021"
+exclude = ["benches"]
+keywords = ["2D", "grid", "hex", "hexagonal", "hexgrid", "hexagon"]
+license = "MIT"
+repository = "https://github.com/ironpeak/hexarr"
 
 [dependencies]
 serde = { version = "1", optional = true }
