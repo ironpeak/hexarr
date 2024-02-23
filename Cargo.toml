@@ -7,7 +7,7 @@ description = "A library for working with hexagonal grids."
 documentation = "https://docs.rs/hexarr"
 edition = "2021"
 exclude = ["benches"]
-keywords = ["2D", "grid", "hex", "hexagonal", "hexgrid", "hexagon"]
+keywords = ["2D", "grid", "hex", "hexagonal", "hexgrid"]
 license = "MIT"
 repository = "https://github.com/ironpeak/hexarr"
 
