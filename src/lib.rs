@@ -11,6 +11,7 @@ impl<T> HexArray<T>
 where
     T: Clone,
 {
+    /// Create a new HexArray with the given height, width, and default value.
     pub fn new(height: usize, width: usize, default: T) -> Self {
         HexArray {
             height,
@@ -21,14 +22,17 @@ where
 }
 
 impl<T> HexArray<T> {
+    /// Get the height of the HexArray.
     pub fn height(&self) -> usize {
         self.height
     }
 
+    /// Get the width of the HexArray.
     pub fn width(&self) -> usize {
         self.width
     }
 
+    /// Get the value at the given indices.
     pub fn get(&self, x: usize, y: usize) -> Option<&T> {
         if x < self.height && y < self.width {
             Some(&self.tiles[x * self.width + y])
@@ -37,6 +41,7 @@ impl<T> HexArray<T> {
         }
     }
 
+    /// Get a mutable reference to the value at the given indices.
     pub fn get_mut(&mut self, x: usize, y: usize) -> Option<&mut T> {
         if x < self.height && y < self.width {
             Some(&mut self.tiles[x * self.width + y])
@@ -45,6 +50,7 @@ impl<T> HexArray<T> {
         }
     }
 
+    /// Set the value at the given indices.
     pub fn set(&mut self, x: usize, y: usize, value: T) -> Option<()> {
         if x < self.height && y < self.width {
             self.tiles[x * self.width + y] = value;
@@ -54,6 +60,34 @@ impl<T> HexArray<T> {
         }
     }
 
+    fn pos(x: usize, y: usize) -> (f32, f32) {
+        const SQRT_3: f32 = 1.732050807568877293527446341505872367_f32;
+        const HALF_SQRT_3: f32 = 0.8660254037844386467637231707529361835_f32;
+        if x % 2 == 0 {
+            let x = x as f32 * 1.5;
+            let y = y as f32 * SQRT_3;
+            (x, y)
+        } else {
+            let x = x as f32 * 1.5;
+            let y = y as f32 * SQRT_3 + HALF_SQRT_3;
+            (x, y)
+        }
+    }
+
+    #[cfg(feature = "glam")]
+    /// Get the position of the tile at the given indices.
+    pub fn position(x: usize, y: usize) -> glam::Vec2 {
+        let (x, y) = Self::pos(x, y);
+        glam::Vec2::new(x, y)
+    }
+
+    #[cfg(not(feature = "glam"))]
+    /// Get the position of the tile at the given indices.
+    pub fn position(x: usize, y: usize) -> (f32, f32) {
+        Self::pos(x, y)
+    }
+
+    /// Get the indices of the tiles adjacent to the given indices.
     pub fn adjacent(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
         let mut result = Vec::new();
         if x % 2 == 0 {
@@ -148,6 +182,28 @@ mod tests {
         assert_eq!(hex_array.get(2, 1), Some(&0));
         assert_eq!(hex_array.get(2, 2), Some(&0));
         assert_eq!(hex_array.get(4, 4), None);
+    }
+
+    // position tests
+
+    #[test]
+    fn test_position_0_0() {
+        assert_eq!(HexArray::<i32>::position(0, 0), (0.0, 0.0));
+    }
+
+    #[test]
+    fn test_position_0_1() {
+        assert_eq!(HexArray::<i32>::position(0, 1), (0.0, 1.7320508));
+    }
+
+    #[test]
+    fn test_position_1_0() {
+        assert_eq!(HexArray::<i32>::position(1, 0), (1.5, 0.8660254));
+    }
+
+    #[test]
+    fn test_position_1_1() {
+        assert_eq!(HexArray::<i32>::position(1, 1), (1.5, 2.598076));
     }
 
     // adjacent tests
